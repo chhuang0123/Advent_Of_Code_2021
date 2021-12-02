@@ -37,26 +37,28 @@ fn main() {
 
 fn parse_h_v(line: &str) -> (i32, i32) {
     let direction_value: Vec<&str> = line.split(' ').collect();
-    if direction_value[0] == "forward" {
-        return (direction_value[1].parse::<i32>().unwrap(), 0);
-    } else if direction_value[0] == "down" {
-        return (0, direction_value[1].parse::<i32>().unwrap());
+    let direction = direction_value[0];
+    let value = direction_value[1].parse::<i32>().unwrap();
+
+    if direction == "forward" {
+        return (value, 0);
+    } else if direction == "down" {
+        return (0, value);
     } else {
-        return (0, direction_value[1].parse::<i32>().unwrap() * -1);
+        return (0, value * -1);
     }
 }
 
 fn parse_h_v_d(line: &str, v: i32) -> (i32, i32, i32) {
     let direction_value: Vec<&str> = line.split(' ').collect();
-    if direction_value[0] == "forward" {
-        return (
-            direction_value[1].parse::<i32>().unwrap(),
-            0,
-            direction_value[1].parse::<i32>().unwrap() * v,
-        );
-    } else if direction_value[0] == "down" {
-        return (0, direction_value[1].parse::<i32>().unwrap(), 0);
+    let direction = direction_value[0];
+    let value = direction_value[1].parse::<i32>().unwrap();
+
+    if direction == "forward" {
+        return (value, 0, value * v);
+    } else if direction == "down" {
+        return (0, value, 0);
     } else {
-        return (0, direction_value[1].parse::<i32>().unwrap() * -1, 0);
+        return (0, value * -1, 0);
     }
 }
