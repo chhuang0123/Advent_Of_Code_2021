@@ -49,53 +49,17 @@ fn main() {
         }
     }
 
-    println!("numbers {:?}", numbers);
-
-    let mut final_drawn: i32 = -1;
-    let mut win_matrix_num: i32 = -1;
-
-    for drawn in numbers {
-        for i in 0..matrix_count {
-            mark(&value_matrix_list[i], &mut count_matrix_list[i], drawn);
-
-            if win(&count_matrix_list[i]) {
-                final_drawn = drawn;
-                win_matrix_num = i as i32;
-                break;
-            }
-        }
-
-        if final_drawn > 0 {
-            break;
-        }
-    }
-
-    println!("final_drawn {:?}", final_drawn);
-    println!("win_matrix_num {:?}", win_matrix_num);
-    println!(
-        "value_matrix {:?}",
-        value_matrix_list[win_matrix_num as usize]
+    get_part1_final_answer(
+        &numbers,
+        &value_matrix_list,
+        &count_matrix_list,
+        matrix_count,
     );
-    println!(
-        "count_matrix {:?}",
-        count_matrix_list[win_matrix_num as usize]
-    );
-
-    let (marked, unmarked) = get_marked_unmarked(
-        &value_matrix_list[win_matrix_num as usize],
-        &count_matrix_list[win_matrix_num as usize],
-    );
-    println!("marked {:?}", marked);
-    println!("unmarked {:?}", unmarked);
-
-    let final_sum = unmarked.iter().sum::<i32>();
-    println!("final_sum {:?}", final_sum);
-
-    println!(
-        "part 1: {} * {} = {}",
-        final_drawn,
-        final_sum,
-        final_drawn * final_sum
+    get_part2_final_answer(
+        &numbers,
+        &value_matrix_list,
+        &count_matrix_list,
+        matrix_count,
     );
 }
 
@@ -114,8 +78,6 @@ fn mark(value_matrix: &[[i32; 5]; 5], count_matrix: &mut [[i32; 5]; 5], target: 
 }
 
 fn win(count_matrix: &[[i32; 5]; 5]) -> bool {
-    // println!("count_matrix {:?}", count_matrix);
-
     let mut count: i32;
     for i in 0..count_matrix.len() {
         count = 0;
@@ -164,4 +126,136 @@ fn get_marked_unmarked(
     }
 
     (marked, unmarked)
+}
+
+fn get_part1_final_answer(
+    numbers: &Vec<i32>,
+    value_matrix_list: &Vec<[[i32; 5]; 5]>,
+    source_count_matrix_list: &Vec<[[i32; 5]; 5]>,
+    matrix_count: i32,
+) {
+    let mut count_matrix_list = source_count_matrix_list.clone();
+
+    let mut win_count: Vec<usize> = Vec::new();
+    let mut final_drawn: i32 = -1;
+    let mut win_matrix_num: usize;
+
+    for drawn in numbers {
+        for i in 0..matrix_count {
+            mark(
+                &value_matrix_list[i as usize],
+                &mut count_matrix_list[i as usize],
+                *drawn,
+            );
+
+            if win(&count_matrix_list[i as usize]) {
+                final_drawn = *drawn;
+                win_matrix_num = i as usize;
+
+                if !win_count.contains(&win_matrix_num) {
+                    win_count.push(win_matrix_num);
+                }
+
+                break;
+            }
+        }
+
+        if win_count.len() == 1 {
+            break;
+        }
+    }
+
+    win_matrix_num = *win_count.last().unwrap();
+    println!("final_drawn {:?}", final_drawn);
+    println!("win_matrix_num {:?}", win_matrix_num);
+    println!(
+        "value_matrix {:?}",
+        value_matrix_list[win_matrix_num as usize]
+    );
+    println!(
+        "count_matrix {:?}",
+        count_matrix_list[win_matrix_num as usize]
+    );
+
+    let (marked, unmarked) = get_marked_unmarked(
+        &value_matrix_list[win_matrix_num as usize],
+        &count_matrix_list[win_matrix_num as usize],
+    );
+    println!("marked {:?}", marked);
+    println!("unmarked {:?}", unmarked);
+
+    let final_sum = unmarked.iter().sum::<i32>();
+    println!("final_sum {:?}", final_sum);
+
+    println!(
+        "part 1: {} * {} = {} \n",
+        final_drawn,
+        final_sum,
+        final_drawn * final_sum
+    );
+}
+
+fn get_part2_final_answer(
+    numbers: &Vec<i32>,
+    value_matrix_list: &Vec<[[i32; 5]; 5]>,
+    source_count_matrix_list: &Vec<[[i32; 5]; 5]>,
+    matrix_count: i32,
+) {
+    let mut count_matrix_list = source_count_matrix_list.clone();
+
+    let mut win_count: Vec<usize> = Vec::new();
+    let mut final_drawn: i32 = -1;
+    let mut win_matrix_num: usize;
+
+    for drawn in numbers {
+        for i in 0..matrix_count {
+            mark(
+                &value_matrix_list[i as usize],
+                &mut count_matrix_list[i as usize],
+                *drawn,
+            );
+
+            if win(&count_matrix_list[i as usize]) {
+                final_drawn = *drawn;
+                win_matrix_num = i as usize;
+
+                if !win_count.contains(&win_matrix_num) {
+                    win_count.push(win_matrix_num);
+                }
+            }
+        }
+
+        if win_count.len() == matrix_count as usize {
+            break;
+        }
+    }
+
+    win_matrix_num = *win_count.last().unwrap();
+    println!("final_drawn {:?}", final_drawn);
+    println!("win_matrix_num {:?}", win_matrix_num);
+    println!(
+        "value_matrix {:?}",
+        value_matrix_list[win_matrix_num as usize]
+    );
+    println!(
+        "count_matrix {:?}",
+        count_matrix_list[win_matrix_num as usize]
+    );
+
+    let (marked, unmarked) = get_marked_unmarked(
+        &value_matrix_list[win_matrix_num as usize],
+        &count_matrix_list[win_matrix_num as usize],
+    );
+    println!("marked {:?}", marked);
+    println!("unmarked {:?}", unmarked);
+
+    let final_sum = unmarked.iter().sum::<i32>();
+    println!("final_sum {:?}", final_sum);
+
+    println!(
+        "part 2: {} * {} = {} \n",
+        final_drawn,
+        final_sum,
+        final_drawn * final_sum
+    );
 }
