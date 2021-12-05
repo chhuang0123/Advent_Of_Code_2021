@@ -2,8 +2,6 @@ use regex::Regex;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
-#[allow(unused_mut)]
-#[allow(unused_variables)]
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let filename = &args[0];
@@ -36,6 +34,7 @@ fn main() {
     // println!("{:?} {:?}", x_max, y_max);
 
     let mut count_matrix: Vec<Vec<usize>> = vec![vec![0; y_max]; x_max];
+    let mut count_matrix_2: Vec<Vec<usize>> = vec![vec![0; y_max]; x_max];
     // println!("{:?}", count_matrix);
 
     let file = File::open(filename).unwrap();
@@ -53,8 +52,12 @@ fn main() {
 
             if y1 == y2 {
                 fill_h(&mut count_matrix, *x1, *x2, *y1);
+                fill_h(&mut count_matrix_2, *x1, *x2, *y1);
             } else if x1 == x2 {
                 fill_v(&mut count_matrix, *y1, *y2, *x1);
+                fill_v(&mut count_matrix_2, *y1, *y2, *x1);
+            } else if (*x1 as i32 - *x2 as i32).abs() == (*y1 as i32 - *y2 as i32).abs() {
+                fill_d(&mut count_matrix_2, *x1, *x2, *y1, *y2);
             }
         }
     }
@@ -62,12 +65,22 @@ fn main() {
     let mut overlap_count: usize = 0;
     for i in 0..count_matrix.len() {
         for j in 0..count_matrix.len() {
-            if count_matrix[i][j] > 1{
+            if count_matrix[i][j] > 1 {
                 overlap_count += 1;
             }
         }
     }
     println!("part 1: {:?}", overlap_count);
+
+    let mut overlap_count: usize = 0;
+    for i in 0..count_matrix_2.len() {
+        for j in 0..count_matrix_2.len() {
+            if count_matrix_2[i][j] > 1 {
+                overlap_count += 1;
+            }
+        }
+    }
+    println!("part 2: {:?}", overlap_count);
 }
 
 fn fill_h(count_matrix: &mut Vec<Vec<usize>>, start: usize, end: usize, j: usize) {
@@ -96,4 +109,27 @@ fn fill_v(count_matrix: &mut Vec<Vec<usize>>, start: usize, end: usize, i: usize
     }
 
     // println!("v after {:?}", count_matrix);
+}
+
+fn fill_d(
+    count_matrix: &mut Vec<Vec<usize>>,
+    x_start: usize,
+    x_end: usize,
+    y_start: usize,
+    y_end: usize,
+) {
+    // println!("d before {:?}", count_matrix);
+
+    let x_multiplier: i32 = if x_start > x_end { -1 } else { 1 };
+    let y_multiplier: i32 = if y_start > y_end { -1 } else { 1 };
+    let diff: i32 = (x_start as i32 - x_end as i32).abs() + 1;
+
+    for z in 0..diff {
+        let i: usize = (x_start as i32 + (x_multiplier * z)) as usize;
+        let j: usize = (y_start as i32 + (y_multiplier * z)) as usize;
+        // println!("i {:?} j {:?}", i, j);
+        count_matrix[j][i] += 1;
+    }
+
+    // println!("d after {:?}", count_matrix);
 }
