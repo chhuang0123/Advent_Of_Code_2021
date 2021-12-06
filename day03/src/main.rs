@@ -1,8 +1,6 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
-#[allow(unused_mut)]
-#[allow(unused_variables)]
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let filename = &args[0];
