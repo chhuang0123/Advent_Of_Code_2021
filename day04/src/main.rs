@@ -22,7 +22,7 @@ fn main() {
                 .map(|x| x.parse::<i32>().unwrap())
                 .collect();
         } else {
-            let mut row_count = (count - 1) % 6;
+            let row_count = (count - 1) % 6;
 
             if row_count == 0 {
                 matrix = [[0; 5]; 5];

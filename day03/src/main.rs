@@ -20,7 +20,7 @@ fn main() {
     println!("part 1: {} * {} = {}", gamma, epsilon, (gamma * epsilon));
 
     // part 2
-    let oxygen = calculate_oxygen_co2(&lines);
+    calculate_oxygen_co2(&lines);
 }
 
 fn get_zero_one_count(lines: &Vec<String>) -> Vec<(i32, i32)> {
