@@ -11,25 +11,36 @@ fn main() {
     // debug!("{}", filename);
 
     let mut digits_sum = 0;
+    let mut decode_sum = 0;
+
     for line in contents.lines() {
         let patterns_value_list: Vec<&str> = line.split(" | ").collect();
+        let mut digital_map: HashMap<i32, HashSet<char>> = HashMap::new();
+
         for (index, output_value) in patterns_value_list.iter().enumerate() {
             if index % 2 == 1 {
-                info!("1 {:?}", output_value);
                 let value_count = output_value
                     .split(" ")
                     .filter(|x| x.len() == 2 || x.len() == 3 || x.len() == 4 || x.len() == 7)
                     .count();
                 digits_sum += value_count;
-                debug!("{:?} {:?}", value_count, digits_sum);
+                info!("output value: {:?} {:?}", output_value, value_count);
+
+                let decode_value = decode_digits(output_value, &digital_map);
+                decode_sum += decode_value;
+                info!("decode value: {:?} {:?}", output_value, decode_value);
             } else {
-                info!("0 {:?}", output_value);
-                let digital_map = generate_map(output_value);
-                info!("{:?}\n->{:?} ({:?})", output_value, digital_map, digital_map.len());
+                digital_map = generate_map(output_value);
+                info!(
+                    "signal patterns: {:?}\n-> {:?}",
+                    output_value,
+                    digital_map
+                );
             }
         }
     }
     info!("part 1: {:?}", digits_sum);
+    info!("part 2: {:?}", decode_sum);
 }
 
 fn generate_map(digitals: &str) -> HashMap<i32, HashSet<char>> {
@@ -121,4 +132,30 @@ fn generate_map(digitals: &str) -> HashMap<i32, HashSet<char>> {
     debug!("length_set_5 {:?}", length_set_5);
     debug!("length_set_6 {:?}", length_set_6);
     digital_map
+}
+
+fn decode_digits(digits: &str, digital_map: &HashMap<i32, HashSet<char>>) -> i32 {
+    let digital_list: Vec<&str> = digits.split(" ").collect();
+    let mut index_count = 4;
+    let mut result = 0;
+    for tmp_digit in digital_list {
+        let digit_set = tmp_digit.chars().collect::<HashSet<char>>();
+        debug!("digit_set {:?}", digit_set);
+
+        for (index, map) in digital_map.iter() {
+            let intersection_count = digit_set
+                .intersection(&map)
+                .cloned()
+                .collect::<HashSet<char>>()
+                .len();
+            if digit_set.len() == intersection_count && map.len() == intersection_count {
+                debug!("digit {:?}", index);
+                result += 10_i32.pow(index_count - 1) * index;
+                continue;
+            }
+        }
+        index_count -= 1;
+    }
+
+    result
 }
