@@ -261,6 +261,11 @@ fn find_basin(low_point: &Point, numbers_of_numbers: &Vec<Vec<u8>>) -> HashSet<P
 
     loop {
         for check_point in basin_points.clone() {
+
+            if check_points.contains(&check_point) {
+                continue;
+            }
+
             if let Some(basin_point) = find_up(check_point.0, check_point.1, &numbers_of_numbers) {
                 debug!("basin_point {:?}", basin_point);
                 basin_points.insert(basin_point);
