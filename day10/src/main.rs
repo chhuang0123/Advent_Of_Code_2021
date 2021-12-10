@@ -21,15 +21,32 @@ fn main() {
     debug!("{:?}", chunks);
 
     let mut illegal_point: u32 = 0;
+    let mut incomplete_point: Vec<u64> = Vec::new();
     for chunk in chunks {
-        if let Err(err) = check_chunk(&chunk) {
-            debug!("err {:?}", err);
-            let point = get_illegal_point(err);
-            debug!("point {:?}", point);
-            illegal_point += point;
+        let result = check_chunk(&chunk);
+        match result {
+            Err(err) => {
+                debug!("err {:?}", err);
+                let point = get_illegal_point(err);
+                debug!("point {:?}", point);
+                illegal_point += point;
+            }
+            Ok(ok) => {
+                if ok.len() != 0 {
+                    incomplete_point.push(get_sum_illegal_point(&ok));
+                }
+            }
         };
     }
     info!("part 1: {:?}", illegal_point);
+
+    debug!("part 2 incomplete_point: {:?}", incomplete_point);
+    incomplete_point.sort();
+    debug!("sorted incomplete_point: {:?}", incomplete_point);
+
+    let middle_index: usize = (incomplete_point.len() as f64 / 2_f64).floor() as usize;
+    debug!("middle_index: {:?}", middle_index);
+    info!("part 2: middle score: {:?}", incomplete_point[middle_index]);
 }
 
 fn get_complete_point(right_char: char) -> u32 {
@@ -52,7 +69,19 @@ fn get_illegal_point(right_char: char) -> u32 {
     }
 }
 
-fn check_chunk(chunk: &Vec<char>) -> Result<usize, char> {
+fn get_sum_illegal_point(incomplete_chunk: &Vec<char>) -> u64 {
+    debug!("incomplete_chunk {:?}", incomplete_chunk);
+
+    let mut result: u64 = 0;
+    for c in incomplete_chunk {
+        result = result * 5_u64 + get_complete_point(*c) as u64;
+    }
+
+    debug!("final sum {:?}", result);
+    result
+}
+
+fn check_chunk(chunk: &Vec<char>) -> Result<Vec<char>, char> {
     debug!("check_chunk {:?}", chunk);
 
     let mut check_stack: Vec<char> = Vec::new();
@@ -70,7 +99,11 @@ fn check_chunk(chunk: &Vec<char>) -> Result<usize, char> {
     }
 
     debug!("check_stack {:?}", check_stack);
-    Ok(check_stack.len())
+    check_stack.reverse();
+    let incomplete_chunk = get_incomplete_chunk(&check_stack);
+    debug!("incomplete_chunk {:?}", incomplete_chunk);
+
+    Ok(incomplete_chunk)
 }
 
 fn get_match(left_char: char) -> char {
@@ -83,24 +116,13 @@ fn get_match(left_char: char) -> char {
     }
 }
 
-fn check_match(left_char: char, right_char: char) -> bool {
-    if left_char == '(' && right_char == ')' {
-        return true;
+fn get_incomplete_chunk(chunk: &Vec<char>) -> Vec<char> {
+    let mut result: Vec<char> = Vec::new();
+    for c in chunk {
+        result.push(get_match(*c));
     }
 
-    if left_char == '[' && right_char == ']' {
-        return true;
-    }
-
-    if left_char == '{' && right_char == '}' {
-        return true;
-    }
-
-    if left_char == '<' && right_char == '>' {
-        return true;
-    }
-
-    false
+    result
 }
 
 #[test]
@@ -128,30 +150,34 @@ fn test_check_chunk_err() {
 
 #[test]
 fn test_check_chunk_ok() {
-    let expect = Ok(0);
+    let expect = Ok(vec![]);
     let actual = check_chunk(&"([])".chars().collect());
     assert_eq!(expect, actual);
 
-    let expect = Ok(0);
+    let expect = Ok(vec![]);
     let actual = check_chunk(&"{()()()}".chars().collect());
     assert_eq!(expect, actual);
 
-    let expect = Ok(0);
+    let expect = Ok(vec![]);
     let actual = check_chunk(&"<([{}])>".chars().collect());
     assert_eq!(expect, actual);
 
-    let expect = Ok(0);
+    let expect = Ok(vec![]);
     let actual = check_chunk(&"[<>({}){}[([])<>]]".chars().collect());
     assert_eq!(expect, actual);
 
-    let expect = Ok(0);
+    let expect = Ok(vec![]);
     let actual = check_chunk(&"(((((((((())))))))))".chars().collect());
     assert_eq!(expect, actual);
 }
 
 #[test]
-fn test_check_chunk_ok_len() {
-    let expect = Ok(8);
-    let actual = check_chunk(&"[({(<(())[]>[[{[]{<()<>>".chars().collect());
+fn test_get_sum_illegal_point() {
+    let expect = 294_u64;
+    let actual = get_sum_illegal_point(&"])}>".chars().collect());
+    assert_eq!(expect, actual);
+
+    let expect = 288957_u64;
+    let actual = get_sum_illegal_point(&"}}]])})]".chars().collect());
     assert_eq!(expect, actual);
 }
