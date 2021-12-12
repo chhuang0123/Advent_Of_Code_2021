@@ -25,19 +25,30 @@ fn main() {
     debug!("{:?}", numbers_of_numbers);
 
     let mut flash_count = 0;
-    for i in 0..100 {
+    let mut count = 1;
+    loop {
         let result = change_energy_level(&mut numbers_of_numbers);
-        flash_count += result;
-        info!("step: {} {:?}", i + 1, numbers_of_numbers);
+        flash_count += result.0;
+        debug!("step: {} {:?}", count, numbers_of_numbers);
         debug!(
             "{:?}  -> result {} sum {}",
-            numbers_of_numbers, result, flash_count
+            numbers_of_numbers, result.0, flash_count
         );
+
+        if count == 100 {
+            info!("part 1: {:?}", flash_count);
+        }
+
+        if result.1 {
+            info!("part 2: {:?}", count);
+            break;
+        }
+
+        count += 1;
     }
-    info!("part 1: {:?}", flash_count);
 }
 
-fn change_energy_level(numbers_of_numbers: &mut Vec<Vec<u8>>) -> u32 {
+fn change_energy_level(numbers_of_numbers: &mut Vec<Vec<u8>>) -> (u32, bool) {
     let row_count = numbers_of_numbers.len();
     let column_count = numbers_of_numbers[0].len();
 
@@ -58,16 +69,21 @@ fn change_energy_level(numbers_of_numbers: &mut Vec<Vec<u8>>) -> u32 {
 
     // reset
     let mut flash_count: u32 = 0;
+    let mut zero_count: u32 = 0;
+
     for i in 0..row_count {
         for j in 0..column_count {
             if numbers_of_numbers[i][j] > 9 {
                 numbers_of_numbers[i][j] = 0;
                 flash_count += 1;
             }
+            if numbers_of_numbers[i][j] == 0 {
+                zero_count += 1;
+            }
         }
     }
 
-    flash_count
+    (flash_count, row_count * column_count == zero_count as usize)
 }
 
 fn flash(greater_10_points: &mut Vec<Point>, numbers_of_numbers: &mut Vec<Vec<u8>>) {
