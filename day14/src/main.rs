@@ -11,47 +11,50 @@ fn main() {
     let contents = fs::read_to_string(&filename).unwrap();
     debug!("filename {}", filename);
 
-    let mut mapping: BTreeMap<String, char> = BTreeMap::new();
+    let mut mapping: BTreeMap<(char, char), char> = BTreeMap::new();
     let mut template: Vec<char> = Vec::new();
     for line in contents.lines() {
         if line.contains("->") {
-            let re = Regex::new(r"([A-Z]+) -> ([A-Z])").unwrap();
+            let re = Regex::new(r"([A-Z])([A-Z]) -> ([A-Z])").unwrap();
             for cap in re.captures_iter(&line) {
-                let (pair, element) = (
-                    &cap[1].parse::<String>().unwrap(),
+                let (c1, c2, element) = (
+                    &cap[1].parse::<char>().unwrap(),
                     &cap[2].parse::<char>().unwrap(),
+                    &cap[3].parse::<char>().unwrap(),
                 );
-                mapping.insert(pair.to_string(), *element);
+                mapping.insert((*c1, *c2), *element);
             }
         } else if line.len() > 1 {
             template = line.chars().collect::<Vec<char>>();
         }
     }
 
-    // debug!("mapping {:?}", mapping);
-    debug!("Template:     {:?}", String::from_iter(&template));
+    debug!("mapping {:?}", mapping);
+    debug!("template {:?}", template);
+    part1(&mapping, &template);
+}
+
+fn part1(mapping: &BTreeMap<(char, char), char>, template: &Vec<char>) {
+    let mut template = template.clone();
 
     for i in 0..10 {
         let result = replacement(&mapping, &template);
         debug!("After step {:?}: {:?}", i + 1, String::from_iter(&result));
-        template = result.clone();
+        template = result;
     }
 
     let frequencies = template.iter().fold(BTreeMap::new(), |mut freqs, value| {
         *freqs.entry(value).or_insert(0) += 1;
         freqs
     });
-    debug!("{:?}", frequencies);
+    info!("{:?}", frequencies);
 
     let max = frequencies.values().max().unwrap();
     let min = frequencies.values().min().unwrap();
     info!("part 1: max {:?} - min {:?} = {:?}", max, min, max - min);
 }
 
-fn replacement(mapping: &BTreeMap<String, char>, template: &Vec<char>) -> Vec<char> {
-    debug!("mapping {:?}", mapping);
-    debug!("template {:?}", template);
-
+fn replacement(mapping: &BTreeMap<(char, char), char>, template: &Vec<char>) -> Vec<char> {
     let mut result: Vec<char> = Vec::new();
     for (i, c) in template.iter().enumerate() {
         result.push(*c);
@@ -60,10 +63,10 @@ fn replacement(mapping: &BTreeMap<String, char>, template: &Vec<char>) -> Vec<ch
             break;
         }
 
-        let pair = String::from_iter(template.iter().skip(i).take(2));
+        let pair = (template[i], template[i + 1]);
         result.push(mapping[&pair]);
     }
 
-    debug!("{:?}", result);
+    debug!("result {:?}", result);
     result
 }
