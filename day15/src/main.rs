@@ -31,7 +31,7 @@ fn main() {
     for i in 0..row_count * 5 {
         for j in 0..column_count * 5 {
             let mut result =
-                risk[i % row_count][j % column_count] + (i / row_count + j / row_count);
+                risk[i % row_count][j % column_count] + (i / row_count) + (j / row_count);
             if result > 9 {
                 result %= 9;
             }
@@ -40,7 +40,11 @@ fn main() {
     }
     debug!("{:?}", five_risk);
 
-    let result = get_lowest_total_risk(row_count * 5, column_count * 5, &five_risk);
+    let row_count = five_risk.len();
+    let column_count = five_risk[0].len();
+    debug!("row_count {:?} column_count {:?}", row_count, column_count);
+
+    let result = get_lowest_total_risk(row_count, column_count, &five_risk);
     info!("part 2: {:?}", result);
 }
 
